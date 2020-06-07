@@ -6,7 +6,7 @@ if (process.argv.length < 3) {
 }
 
 const password = process.argv[2]
-
+console.log(password)
 const url =
   `mongodb+srv://fullstack:${password}@cluster0-1mqas.mongodb.net/test?retryWrites=true`
 

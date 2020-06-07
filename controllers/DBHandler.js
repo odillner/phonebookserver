@@ -1,6 +1,26 @@
-const DB = require('../db.json');
+const mongoose = require('mongoose')
+
+const DB = require('../db.json')
 let table = DB.persons;
 
+// ### MONGODB CONNECTION ###
+const password = process.env.DB_PW
+console.log(password)
+const url =
+  `mongodb+srv://fullstack:${password}@cluster0-1mqas.mongodb.net/people?retryWrites=true`
+
+mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
+
+const personSchema = new mongoose.Schema({
+    name: String,
+    number: Number,
+    date: Date
+})
+
+const Person = mongoose.model('Person', personSchema)
+
+
+// ### MONGODB CONNECTION END ###
 
 const nameExists = (name) => {
     const entry = table.find(entry => entry.name === name);
@@ -14,7 +34,11 @@ const nameExists = (name) => {
 
 module.exports = {
     list: (req, res) => {
-        res.send(table);
+        Person
+        .find({})
+        .then(persons => {
+            res.send(persons);
+        })
     },
 
     create: (req, res) => {
