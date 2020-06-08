@@ -6,11 +6,13 @@ if (process.argv.length < 3) {
 }
 
 const password = process.argv[2]
-console.log(password)
 const url =
-  `mongodb+srv://fullstack:${password}@cluster0-1mqas.mongodb.net/test?retryWrites=true`
+  `mongodb+srv://fullstack:${password}@fullstack-1mqas.mongodb.net/test?retryWrites=true`
 
-mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose
+  .connect(url, {useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true})
+  .then(() => console.log('Database Connected'))
+  .catch(err => console.log(err));
 
 const personSchema = new mongoose.Schema({
   name: String,

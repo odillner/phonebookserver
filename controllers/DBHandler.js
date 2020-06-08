@@ -1,94 +1,117 @@
 const mongoose = require('mongoose')
 
-const DB = require('../db.json')
-let table = DB.persons;
-
 // ### MONGODB CONNECTION ###
-const password = process.env.DB_PW
-console.log(password)
-const url =
-  `mongodb+srv://fullstack:${password}@cluster0-1mqas.mongodb.net/people?retryWrites=true`
 
-mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
+const password = process.env.DB_PW
+const url =
+  `mongodb+srv://fullstack:${password}@fullstack-1mqas.mongodb.net/test?retryWrites=true`
+
+mongoose
+  .connect(url, {useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true})
+  .then(() => console.log('Database Connected'))
+  .catch(err => console.log(err))
 
 const personSchema = new mongoose.Schema({
-    name: String,
-    number: Number,
-    date: Date
+  name: String,
+  number: Number,
+  date: Date
 })
 
 const Person = mongoose.model('Person', personSchema)
 
-
 // ### MONGODB CONNECTION END ###
-
-const nameExists = (name) => {
-    const entry = table.find(entry => entry.name === name);
-
-    if (entry) {
-        return true;
-    } else {
-        return false;
-    }
-}
 
 module.exports = {
     list: (req, res) => {
         Person
         .find({})
         .then(persons => {
-            res.send(persons);
-        })
+            res.json(persons)
+            res.end()
+      })
     },
 
     create: (req, res) => {
-        const entry = req.body;
-        if (Object.prototype.hasOwnProperty.call(entry, 'name')) {
-            if (Object.prototype.hasOwnProperty.call(entry, 'number')) {
-                if (nameExists(entry.name)) {
-                    res.status(400);
-                    res.end("name already exists")
-                } else {
-                    entry.id = Math.floor(Math.random() * Math.floor(10000))
+        const entry = req.body
 
-                    table = table.concat(entry);
-            
-                    res.json(entry);
-                }
-            } else {
-                res.status(400);
-                res.end("number missing")
-            }
-        } else {
-            res.status(400);
+        if (!Object.prototype.hasOwnProperty.call(entry, 'name')) {
+            res.status(400)
             res.end("name missing")
+            return
         }
+
+        if (!Object.prototype.hasOwnProperty.call(entry, 'number')) {
+            res.status(400)
+            res.end("number missing")
+            return
+        }
+
+        Person
+        .find({ "name": entry.name })
+        .then(persons => {
+            if (!persons[0]) {
+                const person = new Person({
+                    name: entry.name,
+                    number: entry.number,
+                    date: new Date()
+                })
+            
+                person
+                .save()
+                .then(result => {
+                    res.json(entry)
+                    res.end()
+                })
+                .catch(err => console.log(err))
+            } else {
+                res.status(400)
+                res.end("name already exists")
+            }
+        })
+        .catch(err => console.log(err))
     },
 
     read: (req, res) => {
-        const id = Number(req.params.id);
-        const entry = table.find(entry => entry.id === id);
-
-        if (entry) {
-            res.json(entry);
-        } else {
-            res.status(404).end();
-        }
+        Person
+        .find({ "_id": req.params.id })
+        .then(person => {
+            if (person[0]) {
+                res.json(person[0])
+                res.end()
+            } else {
+                res.status(404)
+                res.end("not found")
+            }
+        })
+        .catch(err => {
+            console.log(err)
+        })
     },
 
     update: (req, res) => {
-        DB.findOneAndUpdate({_id: req.params.entryId}, req.body, {new: true}, function(err, entry) {
-            if (err)
-            res.send(err);
+        Person
+        .findOneAndUpdate({_id: req.params.id}, req.body, {new: true, useFindAndModify: false}, function(err, entry) {
             res.json(entry);
-        });
+        })
+        .catch(err => {
+            console.log(err)
+        })
     },
 
     remove: (req, res) => {
-        const id = Number(req.params.id)
-        table = table.filter(entry => entry.id !== id)
+        const id = req.params.id
+
+        Person
+        .remove({"_id":id})
+        .then(result => {
+            console.log(result)
+            res.status(204).end()
+        })
+        .catch(err => {
+            console.log(err)
+        })
       
-        res.status(204).end()
+
     },
 
     nofEntries: () => {
