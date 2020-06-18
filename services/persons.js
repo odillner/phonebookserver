@@ -68,7 +68,10 @@ module.exports = {
                 res.end("name already exists")
             }
         })
-        .catch(err => console.log(err))
+        .catch(err => {
+            res.status(418).end()
+            console.log(err)
+        })
     },
 
     read: (req, res) => {
@@ -85,6 +88,7 @@ module.exports = {
         })
         .catch(err => {
             console.log(err)
+            res.status(404).end()
         })
     },
 
@@ -95,6 +99,7 @@ module.exports = {
         })
         .catch(err => {
             console.log(err)
+            res.status(404).end()
         })
     },
 
@@ -102,19 +107,23 @@ module.exports = {
         const id = req.params.id
 
         Person
-        .remove({"_id":id})
+        .deleteOne({"_id":id})
         .then(result => {
-            console.log(result)
             res.status(204).end()
         })
         .catch(err => {
             console.log(err)
+            res.status(404).end()
         })
-      
-
     },
 
     nofEntries: () => {
-        return table.length;
+        return new Promise(resolve => {
+            Person
+            .countDocuments({})
+            .then(result => {
+                resolve(result)
+            })
+        })
     }
 };

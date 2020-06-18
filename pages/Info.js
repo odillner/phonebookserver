@@ -1,9 +1,10 @@
-const dbhandler = require('../controllers/DBHandler');
+const persons = require('../services/persons');
 
-module.exports = (req, res) => {
-    n = dbhandler.nofEntries();
+module.exports = async (req, res) => {
+    const result = await persons.nofEntries();
+
     res.send(
-        `Phonebook has ${n} entries <br>` + new Date()
+        `Phonebook has ${result} entries <br>` + new Date()
     );
 }
 
