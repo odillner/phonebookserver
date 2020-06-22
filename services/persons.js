@@ -1,120 +1,82 @@
 const mongoose = require('mongoose')
-
-// ### MONGODB CONNECTION ###
-
-const password = process.env.DB_PW
-const url =
-  `mongodb+srv://fullstack:${password}@fullstack-1mqas.mongodb.net/test?retryWrites=true`
-
-mongoose
-  .connect(url, {useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true})
-  .then(() => console.log('Database Connected'))
-  .catch(err => console.log(err))
-
-const personSchema = new mongoose.Schema({
-  name: String,
-  number: Number,
-  date: Date
-})
-
-const Person = mongoose.model('Person', personSchema)
-
-// ### MONGODB CONNECTION END ###
+const Person = require('../models/person.js')
 
 module.exports = {
-    list: (req, res) => {
-        Person
-        .find({})
-        .then(persons => {
+    list: async (req, res, next) => {
+        try {
+            const persons = await Person.find({})
+
             res.json(persons)
             res.end()
-      })
+        } catch(err) {
+            next(err)
+        }
     },
 
-    create: (req, res) => {
-        const entry = req.body
+    create: async (req, res, next) => {
+        try {
+            const body = req.body
 
-        if (!Object.prototype.hasOwnProperty.call(entry, 'name')) {
-            res.status(400)
-            res.end("name missing")
-            return
-        }
+            const persons = await Person.find({"name": body.name})
 
-        if (!Object.prototype.hasOwnProperty.call(entry, 'number')) {
-            res.status(400)
-            res.end("number missing")
-            return
-        }
-
-        Person
-        .find({ "name": entry.name })
-        .then(persons => {
             if (!persons[0]) {
-                const person = new Person({
-                    name: entry.name,
-                    number: entry.number,
+                const newPerson = new Person({
+                    name: body.name,
+                    number: body.number,
                     date: new Date()
                 })
             
-                person
-                .save()
-                .then(result => {
-                    res.json(entry)
-                    res.end()
-                })
-                .catch(err => console.log(err))
-            } else {
-                res.status(400)
-                res.end("name already exists")
-            }
-        })
-        .catch(err => {
-            res.status(418).end()
-            console.log(err)
-        })
-    },
+                const result = await newPerson.save()
 
-    read: (req, res) => {
-        Person
-        .find({ "_id": req.params.id })
-        .then(person => {
-            if (person[0]) {
-                res.json(person[0])
+                res.json(result)
                 res.end()
             } else {
-                res.status(404)
-                res.end("not found")
+                res.status(400).send({error: "name already exists"})
             }
-        })
-        .catch(err => {
-            console.log(err)
-            res.status(404).end()
-        })
+        } catch (err) {
+            next(err)
+        }
+        
     },
 
-    update: (req, res) => {
-        Person
-        .findOneAndUpdate({_id: req.params.id}, req.body, {new: true, useFindAndModify: false}, function(err, entry) {
-            res.json(entry);
-        })
-        .catch(err => {
-            console.log(err)
-            res.status(404).end()
-        })
+    read: async (req, res, next) => {
+        try {
+            const person = await Person.findById(req.params.id)
+
+            if (person) {
+                res.json(person)
+                res.end()
+            } else {
+                res.status(404).send({error: "person doesnt exist"})
+            }
+        } catch (err) {
+            next(err)
+        }
     },
 
-    remove: (req, res) => {
-        const id = req.params.id
+    update: async (req, res, next) => {
+        try {
+            const person = await Person.findOneAndUpdate({_id: req.params.id}, req.body, {new: true, useFindAndModify: false})
 
-        Person
-        .deleteOne({"_id":id})
-        .then(result => {
+            if (person) {
+                res.json(person)
+                res.end()
+            } else {
+                res.status(404).send({error: "person doesnt exist"})
+            }
+        } catch (err) {
+            next(err)
+        }
+    },
+
+    remove: async (req, res, next) => {
+        try {
+            const result = await Person.deleteOne({"_id":req.params.id})
             res.status(204).end()
-        })
-        .catch(err => {
-            console.log(err)
-            res.status(404).end()
-        })
+        } catch (err) {
+            next(err)
+        }
+
     },
 
     nofEntries: () => {
