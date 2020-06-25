@@ -23,15 +23,14 @@ const personSchema = new mongoose.Schema({
     date: Date
 })
 
-/*
-noteSchema.set('toJSON', {
+personSchema.set('toJSON', {
   transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString()
     delete returnedObject._id
+    delete returnedObject.date
     delete returnedObject.__v
   }
 })
-*/
 
 module.exports = mongoose.model('Person', personSchema)
 

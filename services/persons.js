@@ -70,13 +70,18 @@ module.exports = {
     },
 
     remove: async (req, res, next) => {
+        const person = await Person.findById(req.params.id)
+
+        if (!person) {
+            res.status(404).send({error: "person doesnt exist"})
+        }
+
         try {
             const result = await Person.deleteOne({"_id":req.params.id})
             res.status(204).end()
         } catch (err) {
             next(err)
         }
-
     },
 
     nofEntries: () => {

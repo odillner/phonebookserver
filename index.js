@@ -12,7 +12,7 @@ const errorHandler = require('./middleware/errorHandler')
 const unknownEndpoint = require('./middleware/unknownEndpoint')
 const routes = require('./routes')
 
-app.use(express.static('build'))
+app.use(express.static('build')) //serving static content
 app.use(cors());
 app.use(express.json()); //body
 
