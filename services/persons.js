@@ -1,4 +1,3 @@
-const mongoose = require('mongoose')
 const Person = require('../models/person.js')
 
 module.exports = {
@@ -17,38 +16,42 @@ module.exports = {
         try {
             const body = req.body
 
-            const persons = await Person.find({"name": body.name})
+            const persons = await Person.find({'name': body.name})
 
-            if (!persons[0]) {
-                const newPerson = new Person({
-                    name: body.name,
-                    number: body.number,
-                    date: new Date()
-                })
-            
-                const result = await newPerson.save()
-
-                res.json(result)
-                res.end()
-            } else {
-                res.status(400).send({error: "name already exists"})
+            if (persons[0]) {
+                res.status(400).send({error: 'name already exists'})
+                return
             }
+
+            const newPerson = new Person({
+                name: body.name,
+                number: body.number,
+                date: new Date()
+            })
+
+            const result = await newPerson.save()
+
+            res.json(result)
+            res.end()
+
         } catch (err) {
             next(err)
         }
-        
+
     },
 
     read: async (req, res, next) => {
         try {
             const person = await Person.findById(req.params.id)
 
-            if (person) {
-                res.json(person)
-                res.end()
-            } else {
-                res.status(404).send({error: "person doesnt exist"})
+            if (!person) {
+                res.status(404).send({error: 'person doesnt exist'})
+                return
             }
+
+            res.json(person)
+            res.end()
+
         } catch (err) {
             next(err)
         }
@@ -58,39 +61,41 @@ module.exports = {
         try {
             const person = await Person.findOneAndUpdate({_id: req.params.id}, req.body, {new: true, useFindAndModify: false})
 
-            if (person) {
-                res.json(person)
-                res.end()
-            } else {
-                res.status(404).send({error: "person doesnt exist"})
+            if (!person) {
+                res.status(404).send({error: 'person doesnt exist'})
+                return
             }
+
+            res.json(person)
+            res.end()
         } catch (err) {
             next(err)
         }
     },
 
     remove: async (req, res, next) => {
-        const person = await Person.findById(req.params.id)
-
-        if (!person) {
-            res.status(404).send({error: "person doesnt exist"})
-        }
-
         try {
-            const result = await Person.deleteOne({"_id":req.params.id})
+            const person = await Person.findById(req.params.id)
+
+            if (!person) {
+                res.status(404).send({error: 'person doesnt exist'})
+                return
+            }
+
+            await Person.deleteOne({'_id':req.params.id})
             res.status(204).end()
         } catch (err) {
             next(err)
         }
     },
 
-    nofEntries: () => {
-        return new Promise(resolve => {
-            Person
-            .countDocuments({})
-            .then(result => {
-                resolve(result)
-            })
-        })
+    nofEntries: async (req, res, next) => {
+        try {
+            const person = await Person.countDocuments({})
+
+            return person
+        } catch (err) {
+            next(err)
+        }
     }
-};
+}
