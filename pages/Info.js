@@ -1,4 +1,4 @@
-const persons = require('../services/persons')
+const persons = require('../controllers/persons')
 
 module.exports = async (req, res) => {
     const result = await persons.nofEntries()

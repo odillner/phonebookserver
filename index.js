@@ -1,16 +1,13 @@
-// for environment variables
-require('dotenv').config()
-
-const PORT = process.env.PORT || 3001
-
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
 const app = express()
 
-const errorHandler = require('./middleware/errorHandler')
-const unknownEndpoint = require('./middleware/unknownEndpoint')
-const routes = require('./routes')
+const errorHandler = require('./utils/errorHandler')
+const unknownEndpoint = require('./utils/unknownEndpoint')
+const routes = require('./routes/routes')
+const config = require('./utils/config')
+const logger = require('./utils/logger')
 
 app.use(express.static('build')) //serving static content
 app.use(cors())
@@ -24,6 +21,6 @@ routes(app)
 app.use(errorHandler)
 app.use(unknownEndpoint)
 
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`)
+app.listen(config.PORT, () => {
+    logger.info(`Server running on port ${config.PORT}`)
 })

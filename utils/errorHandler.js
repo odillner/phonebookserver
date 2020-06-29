@@ -1,5 +1,7 @@
+const logger = require('./logger')
+
 module.exports = (err, req, res, next) => {
-    console.error(err.message)
+    logger.error(err.message)
 
     if (err.name === 'CastError') {
         return res.status(400).send({error: 'Malformatted id'})

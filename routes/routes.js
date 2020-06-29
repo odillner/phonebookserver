@@ -1,5 +1,5 @@
-const persons = require('./services/persons')
-const info = require('./pages/Info')
+const persons = require('../controllers/persons')
+const info = require('../pages/Info')
 
 module.exports = (app) => {
     app.route('/api/persons')
