@@ -16,14 +16,6 @@ module.exports = {
         try {
             const body = req.body
 
-            const persons = await Person.find({'name': body.name})
-
-            if (persons[0]) {
-                let err = new Error('Name already exists in phonebook')
-                err.name = 'ValidationError'
-                throw err
-            }
-
             const newPerson = new Person({
                 name: body.name,
                 number: body.number,
@@ -61,7 +53,7 @@ module.exports = {
 
     update: async (req, res, next) => {
         try {
-            const person = await Person.findOneAndUpdate({_id: req.params.id}, req.body, {new: true, useFindAndModify: false})
+            const person = await Person.findOneAndUpdate({_id: req.params.id}, req.body, {new: true, useFindAndModify: false, runValidators: true})
 
             if (!person) {
                 let err = new Error('Resource not found')

@@ -16,7 +16,7 @@ mongoose
 
 const personSchema = new mongoose.Schema({
     name: String,
-    number: Number,
+    number: String,
     date: Date
 })
 
@@ -31,7 +31,7 @@ if (process.argv[3] && process.argv[4]) {
     })
 
     person.save().then(() => {
-        console.log('person saved!')
+        console.log(`added ${person.name} number ${person.number} to phonebook`)
         mongoose.connection.close()
     })
 } else {
