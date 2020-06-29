@@ -1,4 +1,4 @@
 {
-    "watch": ["*.js", "controllers/"],
+    "watch": ["*.js", "*/"],
     "ext": "js"
 }

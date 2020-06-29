@@ -19,8 +19,9 @@ module.exports = {
             const persons = await Person.find({'name': body.name})
 
             if (persons[0]) {
-                res.status(400).send({error: 'name already exists'})
-                return
+                let err = new Error('Name already exists in phonebook')
+                err.name = 'ValidationError'
+                throw err
             }
 
             const newPerson = new Person({
@@ -45,8 +46,9 @@ module.exports = {
             const person = await Person.findById(req.params.id)
 
             if (!person) {
-                res.status(404).send({error: 'person doesnt exist'})
-                return
+                let err = new Error('Resource not found')
+                err.name = 'NotFoundError'
+                throw err
             }
 
             res.json(person)
@@ -62,8 +64,9 @@ module.exports = {
             const person = await Person.findOneAndUpdate({_id: req.params.id}, req.body, {new: true, useFindAndModify: false})
 
             if (!person) {
-                res.status(404).send({error: 'person doesnt exist'})
-                return
+                let err = new Error('Resource not found')
+                err.name = 'NotFoundError'
+                throw err
             }
 
             res.json(person)
@@ -78,8 +81,9 @@ module.exports = {
             const person = await Person.findById(req.params.id)
 
             if (!person) {
-                res.status(404).send({error: 'person doesnt exist'})
-                return
+                let err = new Error('Resource not found')
+                err.name = 'NotFoundError'
+                throw err
             }
 
             await Person.deleteOne({'_id':req.params.id})
